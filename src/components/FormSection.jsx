@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video } from 'lucide-react';
+import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video, DollarSign } from 'lucide-react';
 
 function FormSection() {
   const [formData, setFormData] = useState({
@@ -9,9 +9,11 @@ function FormSection() {
     correo: '',
     recibo: '',
     estado: '',
+    ciudad: '',
     cotizaIMSS: '',
     saldo: '',
     fechaInicio: '',
+    presupuesto: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -50,7 +52,12 @@ function FormSection() {
       case 'cotizaIMSS':
       case 'saldo':
       case 'fechaInicio':
+      case 'presupuesto':
         if (!value) return 'Selecciona una opción';
+        return '';
+      case 'ciudad':
+        if (!value.trim()) return 'Este campo es requerido';
+        if (value.trim().length < 2) return 'Debe tener al menos 2 caracteres';
         return '';
       default:
         return '';
@@ -280,9 +287,11 @@ function FormSection() {
                   correo: '',
                   recibo: '',
                   estado: '',
+                  ciudad: '',
                   cotizaIMSS: '',
                   saldo: '',
                   fechaInicio: '',
+                  presupuesto: '',
                 });
               }}
               className="btn-secondary"
@@ -463,6 +472,22 @@ function FormSection() {
                   </select>
                   {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <MapPin className="w-4 h-4 inline mr-2" />
+                    Ciudad *
+                  </label>
+                  <input
+                    type="text"
+                    name="ciudad"
+                    value={formData.ciudad}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="Tu ciudad"
+                    className={`input-field ${errors.ciudad ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                  />
+                  {errors.ciudad && <p className="text-red-500 text-xs mt-1">{errors.ciudad}</p>}
+                </div>
               </div>
 
               {/* Row 4: IMSS y Saldo */}
@@ -499,15 +524,37 @@ function FormSection() {
                     className={`input-field ${errors.saldo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   >
                     <option value="">Selecciona una opción</option>
-                    <option value="Sí, tengo más de $100,000">Sí, tengo más de $100,000</option>
+                    <option value="Sí, si tengo más de $100,000">Sí, si tengo más de $100,000</option>
                     <option value="No, tengo menos">No, tengo menos</option>
-                    <option value="No sé cuánto tengo">No sé cuánto tengo</option>
+                    <option value="No sé cuanto tengo">No sé cuanto tengo</option>
                   </select>
                   {errors.saldo && <p className="text-red-500 text-xs mt-1">{errors.saldo}</p>}
                 </div>
               </div>
 
-              {/* Row 5: Fecha */}
+              {/* Row 5: Presupuesto */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <DollarSign className="w-4 h-4 inline mr-2" />
+                  Presupuesto para el proyecto *
+                </label>
+                <select
+                  name="presupuesto"
+                  value={formData.presupuesto}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field ${errors.presupuesto ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                >
+                  <option value="">Selecciona un rango</option>
+                  <option value="$100,000 - $300,000">$100,000 - $300,000</option>
+                  <option value="$300,000 - $500,000">$300,000 - $500,000</option>
+                  <option value="$500,000 - $1,000,000">$500,000 - $1,000,000</option>
+                  <option value="Más de $1,000,000">Más de $1,000,000</option>
+                </select>
+                {errors.presupuesto && <p className="text-red-500 text-xs mt-1">{errors.presupuesto}</p>}
+              </div>
+
+              {/* Row 6: Fecha */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4 inline mr-2" />
