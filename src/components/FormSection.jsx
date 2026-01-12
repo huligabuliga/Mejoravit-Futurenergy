@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video, DollarSign } from 'lucide-react';
+import { useSalesforceCalendly, DEFAULT_FALLBACK_URL } from '../hooks/useSalesforceCalendly';
 
 function FormSection() {
   const [formData, setFormData] = useState({
@@ -22,13 +23,26 @@ function FormSection() {
   const [rejected, setRejected] = useState({ status: false, reason: '' });
   const [assignedSalesperson, setAssignedSalesperson] = useState({ id: '', name: '' });
 
-  // Salesforce ID to Calendly URL mapping
-  const calendlyLinks = {
-    '005V500000CEMMjIAP': 'https://calendly.com/guillermo-salazar-futurenergy', // Willy
-    '005V5000009xlSLIAY': 'https://calendly.com/eduardo-soto-futurenergy/revision-de-claridad-paneles-solares-futurenergy', // Lalo Soto
-    '005V500000CzUqLIAV': 'https://calendly.com/victor-ferrigno-futurenergy/30min', // Victor 
-    '005Hr00000H1N0OIAV': 'https://calendly.com/ventas-futurenergy/30min', // Caro
-  };
+  // Get Calendly links from Salesforce (fetches users in Mejoravit group)
+  const { 
+    calendlyLinks, 
+    mejoravitUsers, 
+    isLoading: isLoadingCalendlyLinks, 
+    error: calendlyLinksError,
+    getCalendlyUrl 
+  } = useSalesforceCalendly();
+
+  // Log when Salesforce data is loaded
+  useEffect(() => {
+    if (!isLoadingCalendlyLinks) {
+      if (calendlyLinksError) {
+        console.warn('⚠️ Failed to load Calendly links from Salesforce, using fallback links');
+      } else {
+        console.log('✅ Salesforce Calendly links ready:', calendlyLinks);
+        console.log('✅ Mejoravit users:', mejoravitUsers);
+      }
+    }
+  }, [isLoadingCalendlyLinks, calendlyLinksError, calendlyLinks, mejoravitUsers]);
 
   const validateField = (name, value) => {
     switch (name) {
@@ -94,29 +108,29 @@ function FormSection() {
 
   const openCalendly = () => {
     if (window.Calendly) {
-      // Get the Calendly URL based on assigned salesperson, fallback to default
+      // Get the Calendly URL from the assigned salesperson or fallback to lookup
       console.log('=== OPENING CALENDLY ===');
       console.log('Current assignedSalesperson state:', assignedSalesperson);
-      console.log('Looking up ID:', assignedSalesperson.id);
-      console.log('Available calendly links:', calendlyLinks);
       
-      const calendlyUrl = calendlyLinks[assignedSalesperson.id];
+      // First try the Calendly link directly from the API response
+      let calendlyUrl = assignedSalesperson.calendlyLink;
       
-      if (!calendlyUrl) {
-        console.error('❌ NO CALENDLY LINK FOUND for ID:', assignedSalesperson.id);
-        console.error('This means either:');
-        console.error('1. The webhook did not return a salesforceID');
-        console.error('2. The salesforceID returned does not match any in our mapping');
-        console.error('Using fallback...');
-      } else {
-        console.log('✅ Found Calendly link:', calendlyUrl);
+      // Fallback to looking up by ID if no direct link
+      if (!calendlyUrl && assignedSalesperson.id) {
+        console.log('No direct calendly link, looking up by ID:', assignedSalesperson.id);
+        calendlyUrl = getCalendlyUrl(assignedSalesperson.id);
       }
       
-      const finalUrl = calendlyUrl || 'https://calendly.com/guillermo-salazar-futurenergy';
-      console.log('Final Calendly URL:', finalUrl);
+      // Final fallback
+      if (!calendlyUrl) {
+        calendlyUrl = DEFAULT_FALLBACK_URL;
+        console.warn('⚠️ Using fallback Calendly URL');
+      }
+      
+      console.log('Final Calendly URL:', calendlyUrl);
 
       window.Calendly.initPopupWidget({
-        url: finalUrl,
+        url: calendlyUrl,
         prefill: {
           name: `${formData.nombre} ${formData.apellido}`,
           email: formData.correo,
@@ -150,19 +164,16 @@ function FormSection() {
       return;
     }
 
-    const eligibility = checkEligibility();
-    if (!eligibility.eligible) {
-      setRejected({ status: true, reason: eligibility.reason });
-      return;
-    }
-
     setIsSubmitting(true);
     
     console.log('=== FORM SUBMISSION STARTED ===');
     console.log('Form data being sent:', formData);
     
+    // Use the Salesforce API backend instead of n8n
+    const API_BASE_URL = import.meta.env.VITE_SALESFORCE_API_URL || 'http://localhost:3001';
+    
     try {
-      const response = await fetch('https://n8n.srv955702.hstgr.cloud/webhook/mejoravitwebsite', {
+      const response = await fetch(`${API_BASE_URL}/api/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -172,36 +183,45 @@ function FormSection() {
       
       console.log('Response status:', response.status);
       console.log('Response OK:', response.ok);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
-      if (!response.ok) {
-        throw new Error('Error al enviar el formulario');
+      const responseData = await response.json();
+      console.log('=== API RESPONSE RECEIVED ===');
+      console.log('Full response:', JSON.stringify(responseData, null, 2));
+
+      // Check if lead was rejected due to eligibility
+      if (!responseData.eligible) {
+        console.log('❌ Lead not eligible:', responseData.reason);
+        setRejected({ status: true, reason: responseData.reason });
+        return;
+      }
+      
+      if (!response.ok || !responseData.success) {
+        throw new Error(responseData.error || 'Error al enviar el formulario');
       }
 
-      // Parse webhook response to get assigned salesperson
-      const webhookData = await response.json();
-      console.log('=== WEBHOOK RESPONSE RECEIVED ===');
-      console.log('Full webhook response:', JSON.stringify(webhookData, null, 2));
-      console.log('Webhook data type:', typeof webhookData);
-      console.log('Webhook data keys:', Object.keys(webhookData));
-
-      // Store the assigned salesperson info
-      if (webhookData.salesforceID) {
-        console.log('✅ Salesforce ID found:', webhookData.salesforceID);
+      // Store the assigned salesperson info from the response
+      if (responseData.assignedTo) {
+        console.log('✅ Lead assigned to:', responseData.assignedTo.name);
         setAssignedSalesperson({
-          id: webhookData.salesforceID,
-          name: webhookData.name || ''
+          id: responseData.assignedTo.id,
+          name: responseData.assignedTo.name,
+          calendlyLink: responseData.assignedTo.calendlyLink
         });
-        const assignedCalendly = calendlyLinks[webhookData.salesforceID] || 'default';
         console.log('Assigned salesperson details:', {
-          id: webhookData.salesforceID,
-          name: webhookData.name,
-          calendlyLink: assignedCalendly,
-          hasMatchingCalendlyLink: !!calendlyLinks[webhookData.salesforceID]
+          id: responseData.assignedTo.id,
+          name: responseData.assignedTo.name,
+          calendlyLink: responseData.assignedTo.calendlyLink,
+          leadId: responseData.leadId
+        });
+      } else if (responseData.salesforceID) {
+        // Fallback for backward compatibility
+        console.log('✅ Salesforce ID found:', responseData.salesforceID);
+        setAssignedSalesperson({
+          id: responseData.salesforceID,
+          name: responseData.name || ''
         });
       } else {
-        console.warn('⚠️ No salesforceID in webhook response');
-        console.log('Available response fields:', Object.keys(webhookData));
+        console.warn('⚠️ No assigned salesperson in response');
       }
       
       console.log('=== FORM SUBMISSION COMPLETED ===');
