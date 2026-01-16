@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video, DollarSign } from 'lucide-react';
 import { useSalesforceCalendly, DEFAULT_FALLBACK_URL } from '../hooks/useSalesforceCalendly';
 
@@ -21,28 +21,10 @@ function FormSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [rejected, setRejected] = useState({ status: false, reason: '' });
-  const [assignedSalesperson, setAssignedSalesperson] = useState({ id: '', name: '' });
+  const [assignedSalesperson, setAssignedSalesperson] = useState({ id: '', name: '', calendlyLink: '' });
 
-  // Get Calendly links from Salesforce (fetches users in Mejoravit group)
-  const { 
-    calendlyLinks, 
-    mejoravitUsers, 
-    isLoading: isLoadingCalendlyLinks, 
-    error: calendlyLinksError,
-    getCalendlyUrl 
-  } = useSalesforceCalendly();
-
-  // Log when Salesforce data is loaded
-  useEffect(() => {
-    if (!isLoadingCalendlyLinks) {
-      if (calendlyLinksError) {
-        console.warn('⚠️ Failed to load Calendly links from Salesforce, using fallback links');
-      } else {
-        console.log('✅ Salesforce Calendly links ready:', calendlyLinks);
-        console.log('✅ Mejoravit users:', mejoravitUsers);
-      }
-    }
-  }, [isLoadingCalendlyLinks, calendlyLinksError, calendlyLinks, mejoravitUsers]);
+  // Get Calendly URL helper (no longer pre-fetches data)
+  const { getCalendlyUrl } = useSalesforceCalendly();
 
   const validateField = (name, value) => {
     switch (name) {
@@ -108,26 +90,18 @@ function FormSection() {
 
   const openCalendly = () => {
     if (window.Calendly) {
-      // Get the Calendly URL from the assigned salesperson or fallback to lookup
-      console.log('=== OPENING CALENDLY ===');
-      console.log('Current assignedSalesperson state:', assignedSalesperson);
-      
-      // First try the Calendly link directly from the API response
+      // Get the Calendly URL from the assigned salesperson or fallback
       let calendlyUrl = assignedSalesperson.calendlyLink;
       
       // Fallback to looking up by ID if no direct link
       if (!calendlyUrl && assignedSalesperson.id) {
-        console.log('No direct calendly link, looking up by ID:', assignedSalesperson.id);
         calendlyUrl = getCalendlyUrl(assignedSalesperson.id);
       }
       
       // Final fallback
       if (!calendlyUrl) {
         calendlyUrl = DEFAULT_FALLBACK_URL;
-        console.warn('⚠️ Using fallback Calendly URL');
       }
-      
-      console.log('Final Calendly URL:', calendlyUrl);
 
       window.Calendly.initPopupWidget({
         url: calendlyUrl,
@@ -173,9 +147,6 @@ function FormSection() {
 
     setIsSubmitting(true);
     
-    console.log('=== FORM SUBMISSION STARTED ===');
-    console.log('Form data being sent:', formData);
-    
     // Use the Salesforce API backend instead of n8n
     const API_BASE_URL = import.meta.env.VITE_SALESFORCE_API_URL || 'http://localhost:3001';
     
@@ -188,16 +159,10 @@ function FormSection() {
         body: JSON.stringify(formData),
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response OK:', response.ok);
-      
       const responseData = await response.json();
-      console.log('=== API RESPONSE RECEIVED ===');
-      console.log('Full response:', JSON.stringify(responseData, null, 2));
 
       // Check if lead was rejected due to eligibility
       if (!responseData.eligible) {
-        console.log('❌ Lead not eligible:', responseData.reason);
         setRejected({ status: true, reason: responseData.reason });
         return;
       }
@@ -208,33 +173,21 @@ function FormSection() {
 
       // Store the assigned salesperson info from the response
       if (responseData.assignedTo) {
-        console.log('✅ Lead assigned to:', responseData.assignedTo.name);
         setAssignedSalesperson({
           id: responseData.assignedTo.id,
           name: responseData.assignedTo.name,
           calendlyLink: responseData.assignedTo.calendlyLink
         });
-        console.log('Assigned salesperson details:', {
-          id: responseData.assignedTo.id,
-          name: responseData.assignedTo.name,
-          calendlyLink: responseData.assignedTo.calendlyLink,
-          leadId: responseData.leadId
-        });
       } else if (responseData.salesforceID) {
         // Fallback for backward compatibility
-        console.log('✅ Salesforce ID found:', responseData.salesforceID);
         setAssignedSalesperson({
           id: responseData.salesforceID,
           name: responseData.name || ''
         });
-      } else {
-        console.warn('⚠️ No assigned salesperson in response');
       }
       
-      console.log('=== FORM SUBMISSION COMPLETED ===');
       setSubmitted(true);
     } catch (error) {
-      console.error('=== ERROR DURING SUBMISSION ===');
       console.error('Error submitting form:', error);
       alert('Hubo un error al enviar el formulario. Por favor intenta de nuevo.');
     } finally {
