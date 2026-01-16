@@ -13,7 +13,7 @@ const testimonials = [
   },
   {
     id: 2,
-    name: 'Roberto G.',
+    name: 'Miguel S.',
     location: 'San pedro garza garcía, NL',
     rating: 5,
     text: 'Quiero felicitar a todo el equipo, estoy muy contenta de haberlos elegido. La instalación fue todo un éxito y toda la gente con la que tuve el gusto de tratar fue maravillosa. Me explicaron con mucha claridad y siempre hubo mucho orden y limpieza. ¡Gracias! ⚡😁🙏',
