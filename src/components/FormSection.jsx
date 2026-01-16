@@ -290,11 +290,9 @@ function FormSection() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="card text-center py-10 md:py-12 animate-scale-in">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse-glow">
-              <svg className="w-8 h-8 md:w-10 md:h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
+              <Video className="w-8 h-8 md:w-10 md:h-10 text-green-500" />
             </div>
-            <h3 className="text-xl md:text-2xl font-bold text-[#1B263B] mb-4">¡Gracias por tu solicitud!</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-[#1B263B] mb-4">¡Cumples con los requisitos!</h3>
             <p className="text-gray-600 mb-6 text-sm md:text-base px-4">
               Hemos recibido tus datos. Ahora agenda tu videollamada con un asesor de FuturEnergy.
             </p>
