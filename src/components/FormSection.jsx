@@ -298,19 +298,13 @@ function FormSection() {
             <p className="text-gray-600 mb-6 text-sm md:text-base px-4">
               Hemos recibido tus datos. Ahora agenda tu videollamada con un asesor de FuturEnergy.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <button
                 onClick={openCalendly}
                 className="btn-primary flex items-center justify-center gap-2"
               >
                 <Video className="w-5 h-5" />
                 Agendar Videollamada
-              </button>
-              <button
-                onClick={() => setSubmitted(false)}
-                className="btn-secondary"
-              >
-                Enviar otra solicitud
               </button>
             </div>
           </div>
