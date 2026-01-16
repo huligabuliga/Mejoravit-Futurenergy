@@ -164,6 +164,13 @@ function FormSection() {
       return;
     }
 
+    // Check eligibility BEFORE submitting to Salesforce
+    const eligibility = checkEligibility();
+    if (!eligibility.eligible) {
+      setRejected({ status: true, reason: eligibility.reason });
+      return;
+    }
+
     setIsSubmitting(true);
     
     console.log('=== FORM SUBMISSION STARTED ===');
