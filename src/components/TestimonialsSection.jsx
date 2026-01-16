@@ -3,7 +3,7 @@ import { Star, Quote, MessageCircle } from 'lucide-react';
 const testimonials = [
   {
     id: 1,
-    name: 'Carlos M.',
+    name: 'Andrés P.',
     location: 'Monterrey, NL',
     rating: 5,
     text: 'Les quiero externar mi agradecimiento por el trabajo tan profesional que hicieron en mi casa. Quedé sorprendido por los tiempos de respuesta de CFE y que en 30 días ya teníamos produciendo electricidad. ¡Una felicitación a todo el equipo! Con toda confianza serán muy bien recomendados con mis familiares y amigos.',
@@ -13,7 +13,7 @@ const testimonials = [
   },
   {
     id: 2,
-    name: 'Ana P.',
+    name: 'Roberto G.',
     location: 'San pedro garza garcía, NL',
     rating: 5,
     text: 'Quiero felicitar a todo el equipo, estoy muy contenta de haberlos elegido. La instalación fue todo un éxito y toda la gente con la que tuve el gusto de tratar fue maravillosa. Me explicaron con mucha claridad y siempre hubo mucho orden y limpieza. ¡Gracias! ⚡😁🙏',
