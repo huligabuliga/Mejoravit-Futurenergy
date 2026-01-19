@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video, DollarSign } from 'lucide-react';
+import { Calendar, User, Phone, Mail, MapPin, Building, CreditCard, Send, Video, DollarSign, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useSalesforceCalendly, DEFAULT_FALLBACK_URL } from '../hooks/useSalesforceCalendly';
 
 function FormSection() {
@@ -22,6 +22,12 @@ function FormSection() {
   const [submitted, setSubmitted] = useState(false);
   const [rejected, setRejected] = useState({ status: false, reason: '' });
   const [assignedSalesperson, setAssignedSalesperson] = useState({ id: '', name: '', calendlyLink: '' });
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 2;
+
+  // Fields for each step
+  const step1Fields = ['nombre', 'apellido', 'telefono', 'correo', 'estado', 'ciudad'];
+  const step2Fields = ['recibo', 'cotizaIMSS', 'saldo', 'presupuesto', 'fechaInicio'];
 
   // Get Calendly URL helper (no longer pre-fetches data)
   const { getCalendlyUrl } = useSalesforceCalendly();
@@ -68,6 +74,27 @@ function FormSection() {
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep = (step) => {
+    const fieldsToValidate = step === 1 ? step1Fields : step2Fields;
+    const newErrors = {};
+    fieldsToValidate.forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+    }
+  };
+
+  const handlePrevStep = () => {
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
   const handleChange = (e) => {
@@ -329,228 +356,298 @@ function FormSection() {
 
         <div className="max-w-4xl mx-auto">
           <div className="card animate-fade-in-up animation-delay-200">
+            {/* Stepper indicator - visible on mobile */}
+            <div className="flex items-center justify-center mb-6 md:hidden">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep >= 1 ? 'bg-[#00C896] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  1
+                </div>
+                <div className={`w-12 h-1 ${currentStep >= 2 ? 'bg-[#00C896]' : 'bg-gray-200'}`}></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${currentStep >= 2 ? 'bg-[#00C896] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  2
+                </div>
+              </div>
+            </div>
+            <div className="text-center mb-4 md:hidden">
+              <p className="text-sm text-gray-600">
+                {currentStep === 1 ? 'Datos de contacto' : 'Información del crédito'}
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6" noValidate>
-              {/* Row 1: Nombre y Apellido */}
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <User className="w-4 h-4 inline mr-2" />
-                    Nombre *
-                  </label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Tu nombre"
-                    className={`input-field ${errors.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  />
-                  {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+              {/* Step 1: Contact Information - shown on mobile only for step 1, always on desktop */}
+              <div className={`${currentStep === 1 ? 'block' : 'hidden'} md:block`}>
+                {/* Row 1: Nombre y Apellido */}
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <User className="w-4 h-4 inline mr-2" />
+                      Nombre *
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Tu nombre"
+                      className={`input-field ${errors.nombre ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <User className="w-4 h-4 inline mr-2" />
+                      Apellido *
+                    </label>
+                    <input
+                      type="text"
+                      name="apellido"
+                      value={formData.apellido}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Tu apellido"
+                      className={`input-field ${errors.apellido ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <User className="w-4 h-4 inline mr-2" />
-                    Apellido *
-                  </label>
-                  <input
-                    type="text"
-                    name="apellido"
-                    value={formData.apellido}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Tu apellido"
-                    className={`input-field ${errors.apellido ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  />
-                  {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
-                </div>
-              </div>
 
-              {/* Row 2: Teléfono y Correo */}
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Phone className="w-4 h-4 inline mr-2" />
-                    Teléfono *
-                  </label>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="10 dígitos"
-                    maxLength={10}
-                    className={`input-field ${errors.telefono ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  />
-                  {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
+                {/* Row 2: Teléfono y Correo */}
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Phone className="w-4 h-4 inline mr-2" />
+                      Teléfono *
+                    </label>
+                    <input
+                      type="tel"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="10 dígitos"
+                      maxLength={10}
+                      className={`input-field ${errors.telefono ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Mail className="w-4 h-4 inline mr-2" />
+                      Correo *
+                    </label>
+                    <input
+                      type="email"
+                      name="correo"
+                      value={formData.correo}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="tu@correo.com"
+                      className={`input-field ${errors.correo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    {errors.correo && <p className="text-red-500 text-xs mt-1">{errors.correo}</p>}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="w-4 h-4 inline mr-2" />
-                    Correo *
-                  </label>
-                  <input
-                    type="email"
-                    name="correo"
-                    value={formData.correo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="tu@correo.com"
-                    className={`input-field ${errors.correo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  />
-                  {errors.correo && <p className="text-red-500 text-xs mt-1">{errors.correo}</p>}
-                </div>
-              </div>
 
-              {/* Row 3: Recibo y Estado */}
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <CreditCard className="w-4 h-4 inline mr-2" />
-                    ¿Cuánto pagas en tu recibo? *
-                  </label>
-                  <select
-                    name="recibo"
-                    value={formData.recibo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${errors.recibo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                {/* Row 3: Estado y Ciudad */}
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <MapPin className="w-4 h-4 inline mr-2" />
+                      Estado *
+                    </label>
+                    <select
+                      name="estado"
+                      value={formData.estado}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`input-field ${errors.estado ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    >
+                      <option value="">Selecciona tu estado</option>
+                      <option value="Nuevo León">Nuevo León</option>
+                      <option value="Otro estado">Otro estado</option>
+                    </select>
+                    {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <MapPin className="w-4 h-4 inline mr-2" />
+                      Ciudad *
+                    </label>
+                    <input
+                      type="text"
+                      name="ciudad"
+                      value={formData.ciudad}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Tu ciudad"
+                      className={`input-field ${errors.ciudad ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    />
+                    {errors.ciudad && <p className="text-red-500 text-xs mt-1">{errors.ciudad}</p>}
+                  </div>
+                </div>
+
+                {/* Next Step Button - Mobile only */}
+                <div className="pt-4 md:hidden">
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className="btn-primary w-full py-3 flex items-center justify-center gap-2"
                   >
-                    <option value="">Selecciona un rango</option>
-                    <option value="Menos de $3,000">Menos de $3,000</option>
-                    <option value="$3,000 a $5,000">$3,000 a $5,000</option>
-                    <option value="$5,000 a $10,000">$5,000 a $10,000</option>
-                    <option value="Más de $10,000">Más de $10,000</option>
-                    <option value="Más de $50,000">Más de $50,000</option>
-                  </select>
-                  {errors.recibo && <p className="text-red-500 text-xs mt-1">{errors.recibo}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Estado *
-                  </label>
-                  <select
-                    name="estado"
-                    value={formData.estado}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${errors.estado ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  >
-                    <option value="">Selecciona tu estado</option>
-                    <option value="Nuevo León">Nuevo León</option>
-                    <option value="Otro estado">Otro estado</option>
-                  </select>
-                  {errors.estado && <p className="text-red-500 text-xs mt-1">{errors.estado}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-2" />
-                    Ciudad *
-                  </label>
-                  <input
-                    type="text"
-                    name="ciudad"
-                    value={formData.ciudad}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Tu ciudad"
-                    className={`input-field ${errors.ciudad ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                  />
-                  {errors.ciudad && <p className="text-red-500 text-xs mt-1">{errors.ciudad}</p>}
+                    Siguiente
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
 
-              {/* Row 4: IMSS y Saldo */}
-              <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
-                <div>
+              {/* Step 2: Mejoravit Specific Questions - shown on mobile only for step 2, always on desktop */}
+              <div className={`${currentStep === 2 ? 'block' : 'hidden'} md:block`}>
+                {/* Row 4: Recibo */}
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <CreditCard className="w-4 h-4 inline mr-2" />
+                      ¿Cuánto pagas en tu recibo? *
+                    </label>
+                    <select
+                      name="recibo"
+                      value={formData.recibo}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`input-field ${errors.recibo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    >
+                      <option value="">Selecciona un rango</option>
+                      <option value="Menos de $3,000">Menos de $3,000</option>
+                      <option value="$3,000 a $5,000">$3,000 a $5,000</option>
+                      <option value="$5,000 a $10,000">$5,000 a $10,000</option>
+                      <option value="Más de $10,000">Más de $10,000</option>
+                      <option value="Más de $50,000">Más de $50,000</option>
+                    </select>
+                    {errors.recibo && <p className="text-red-500 text-xs mt-1">{errors.recibo}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Building className="w-4 h-4 inline mr-2" />
+                      ¿Estás cotizando ante IMSS? *
+                    </label>
+                    <select
+                      name="cotizaIMSS"
+                      value={formData.cotizaIMSS}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`input-field ${errors.cotizaIMSS ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    >
+                      <option value="">Selecciona una opción</option>
+                      <option value="Sí, actualmente cotizo">Sí, actualmente cotizo</option>
+                      <option value="No estoy cotizando">No estoy cotizando</option>
+                      <option value="No estoy seguro">No estoy seguro</option>
+                    </select>
+                    {errors.cotizaIMSS && <p className="text-red-500 text-xs mt-1">{errors.cotizaIMSS}</p>}
+                  </div>
+                </div>
+
+                {/* Row 5: Saldo y Presupuesto */}
+                <div className="grid sm:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <CreditCard className="w-4 h-4 inline mr-2" />
+                      ¿Más de $100,000 en subcuenta? *
+                    </label>
+                    <select
+                      name="saldo"
+                      value={formData.saldo}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`input-field ${errors.saldo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    >
+                      <option value="">Selecciona una opción</option>
+                      <option value="Sí, si tengo más de $100,000">Sí, si tengo más de $100,000</option>
+                      <option value="No, tengo menos">No, tengo menos</option>
+                      <option value="No sé cuanto tengo">No sé cuanto tengo</option>
+                    </select>
+                    {errors.saldo && <p className="text-red-500 text-xs mt-1">{errors.saldo}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <DollarSign className="w-4 h-4 inline mr-2" />
+                      Presupuesto para el proyecto *
+                    </label>
+                    <select
+                      name="presupuesto"
+                      value={formData.presupuesto}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      className={`input-field ${errors.presupuesto ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    >
+                      <option value="">Selecciona un rango</option>
+                      <option value="$100,000 - $300,000">$100,000 - $300,000</option>
+                      <option value="$300,000 - $500,000">$300,000 - $500,000</option>
+                      <option value="$500,000 - $1,000,000">$500,000 - $1,000,000</option>
+                      <option value="Más de $1,000,000">Más de $1,000,000</option>
+                    </select>
+                    {errors.presupuesto && <p className="text-red-500 text-xs mt-1">{errors.presupuesto}</p>}
+                  </div>
+                </div>
+
+                {/* Row 6: Fecha */}
+                <div className="mb-4 md:mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Building className="w-4 h-4 inline mr-2" />
-                    ¿Estás cotizando ante IMSS? *
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    ¿Cuándo quieres empezar tu proyecto? *
                   </label>
                   <select
-                    name="cotizaIMSS"
-                    value={formData.cotizaIMSS}
+                    name="fechaInicio"
+                    value={formData.fechaInicio}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`input-field ${errors.cotizaIMSS ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                    className={`input-field ${errors.fechaInicio ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   >
                     <option value="">Selecciona una opción</option>
-                    <option value="Sí, actualmente cotizo">Sí, actualmente cotizo</option>
-                    <option value="No estoy cotizando">No estoy cotizando</option>
-                    <option value="No estoy seguro">No estoy seguro</option>
+                    <option value="Inmediata">Inmediata</option>
+                    <option value="Más De Un Mes">Más De Un Mes</option>
+                    <option value="Más De Dos Meses">Más De Dos Meses</option>
+                    <option value="Más De Tres Meses">Más De Tres Meses</option>
+                    <option value="Más De Seis Meses">Más De Seis Meses</option>
                   </select>
-                  {errors.cotizaIMSS && <p className="text-red-500 text-xs mt-1">{errors.cotizaIMSS}</p>}
+                  {errors.fechaInicio && <p className="text-red-500 text-xs mt-1">{errors.fechaInicio}</p>}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <CreditCard className="w-4 h-4 inline mr-2" />
-                    ¿Tienes más de $100,000 en tu subcuenta? *
-                  </label>
-                  <select
-                    name="saldo"
-                    value={formData.saldo}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    className={`input-field ${errors.saldo ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+
+                {/* Navigation Buttons - Mobile only */}
+                <div className="flex gap-3 pt-4 md:hidden">
+                  <button
+                    type="button"
+                    onClick={handlePrevStep}
+                    className="btn-secondary flex-1 py-3 flex items-center justify-center gap-2"
                   >
-                    <option value="">Selecciona una opción</option>
-                    <option value="Sí, si tengo más de $100,000">Sí, si tengo más de $100,000</option>
-                    <option value="No, tengo menos">No, tengo menos</option>
-                    <option value="No sé cuanto tengo">No sé cuanto tengo</option>
-                  </select>
-                  {errors.saldo && <p className="text-red-500 text-xs mt-1">{errors.saldo}</p>}
+                    <ChevronLeft className="w-5 h-5" />
+                    Atrás
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary flex-1 py-3 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Enviar
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
 
-              {/* Row 5: Presupuesto */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <DollarSign className="w-4 h-4 inline mr-2" />
-                  Presupuesto para el proyecto *
-                </label>
-                <select
-                  name="presupuesto"
-                  value={formData.presupuesto}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`input-field ${errors.presupuesto ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                >
-                  <option value="">Selecciona un rango</option>
-                  <option value="$100,000 - $300,000">$100,000 - $300,000</option>
-                  <option value="$300,000 - $500,000">$300,000 - $500,000</option>
-                  <option value="$500,000 - $1,000,000">$500,000 - $1,000,000</option>
-                  <option value="Más de $1,000,000">Más de $1,000,000</option>
-                </select>
-                {errors.presupuesto && <p className="text-red-500 text-xs mt-1">{errors.presupuesto}</p>}
-              </div>
-
-              {/* Row 6: Fecha */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Calendar className="w-4 h-4 inline mr-2" />
-                  ¿Cuándo quieres empezar tu proyecto? *
-                </label>
-                <select
-                  name="fechaInicio"
-                  value={formData.fechaInicio}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`input-field ${errors.fechaInicio ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                >
-                  <option value="">Selecciona una opción</option>
-                  <option value="Inmediata">Inmediata</option>
-                  <option value="Más De Un Mes">Más De Un Mes</option>
-                  <option value="Más De Dos Meses">Más De Dos Meses</option>
-                  <option value="Más De Tres Meses">Más De Tres Meses</option>
-                  <option value="Más De Seis Meses">Más De Seis Meses</option>
-                </select>
-                {errors.fechaInicio && <p className="text-red-500 text-xs mt-1">{errors.fechaInicio}</p>}
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-2 md:pt-4">
+              {/* Submit Button - Desktop only */}
+              <div className="pt-2 md:pt-4 hidden md:block">
                 <button
                   type="submit"
                   disabled={isSubmitting}
