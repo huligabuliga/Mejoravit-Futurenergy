@@ -213,6 +213,17 @@ function FormSection() {
         });
       }
       
+      // GTM dataLayer push for lead tracking (GA4 + Google Ads)
+      // Ejecutar SOLO cuando el backend confirma éxito (lead creado)
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'lead_success',
+        landing_id: 'mejoravit',
+        form_id: 'main_form',
+        lead_type: 'mejoravit',
+        event_id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now())
+      });
+      
       setSubmitted(true);
     } catch (error) {
       console.error('Error submitting form:', error);
