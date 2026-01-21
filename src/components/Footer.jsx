@@ -1,4 +1,4 @@
-import { Sun, Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
 
 function Footer() {
   return (
@@ -7,8 +7,12 @@ function Footer() {
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
           {/* Logo & Description */}
           <div className="sm:col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <Sun className="w-7 h-7 md:w-8 md:h-8 text-[#F48C06]" />
+            <div className="flex items-center gap-4 mb-4">
+              <img 
+                src="/images/Logo-Futurenergy.png" 
+                alt="FuturEnergy Logo" 
+                className="w-20 h-20 md:w-24 md:h-24" 
+              />
               <span className="text-xl md:text-2xl font-bold">FuturEnergy</span>
             </div>
             <p className="text-gray-400 mb-4 text-sm md:text-base">
