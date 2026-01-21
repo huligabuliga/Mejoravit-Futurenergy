@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://mejoravit.futurenergy.mx/sitemap.xml
