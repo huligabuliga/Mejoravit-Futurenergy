@@ -49,7 +49,7 @@ function HeroSection() {
               <div className="text-xs sm:text-sm text-gray-400">Ahorro en luz</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#F48C06]">$52</div>
+              <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#F48C06]">$62</div>
               <div className="text-xs sm:text-sm text-gray-400">Pagas al mes</div>
             </div>
             <div className="text-center">
