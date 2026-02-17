@@ -23,13 +23,13 @@ const testimonials = [
   },
   {
     id: 3,
-    name: 'Roberto G.',
+    name: 'Deborah Tavera',
     location: 'Guadalupe, NL',
     rating: 5,
     text: 'Excelente servicio desde el primer contacto. El asesor me explicó todo el proceso del crédito Mejoravit muy claro. La instalación fue rápida y profesional. Ahora solo pago $62 pesos de luz cuando antes pagaba más de $5,000. ¡Totalmente recomendado!',
-    date: 'Diciembre 2024',
+    date: 'Enero 202',
     highlight: 'De $5,000 a $62',
-    image: null,
+    image: '/images/clienteFeliz-3.jpeg',
   },
   {
     id: 4,
