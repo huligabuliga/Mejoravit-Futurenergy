@@ -66,6 +66,7 @@ function Footer() {
         <div className="border-t border-gray-700 mt-8 pt-6 md:pt-8 text-center text-gray-500 text-xs md:text-sm">
           <p>© {new Date().getFullYear()} FuturEnergy. Todos los derechos reservados.</p>
           <p className="mt-2">Crédito Mejoravit para Paneles Solares</p>
+          <p className="mt-1">Última actualización: Abril 2026</p>
         </div>
       </div>
     </footer>
