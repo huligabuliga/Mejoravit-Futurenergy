@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Sitemap: https://mejoravit.futurenergy.mx/sitemap.xml
+LLMs: https://mejoravit.futurenergy.mx/llms.txt

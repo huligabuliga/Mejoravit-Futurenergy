@@ -1,0 +1,32 @@
+# FuturEnergy — Financiamiento Mejoravit para Paneles Solares en Monterrey
+
+> FuturEnergy es la empresa líder en instalación de paneles solares en Monterrey, Nuevo León, México, especializada en financiamiento con crédito Mejoravit de INFONAVIT. Los trabajadores pueden usar hasta $163,000 MXN de su subcuenta de vivienda INFONAVIT para instalar paneles solares — pagando tan solo $62/mes — con hasta 95% de ahorro en su recibo de luz. Más de 500 familias satisfechas, calificación de 4.9 estrellas, el proceso Mejoravit más rápido del mercado. FuturEnergy is the leading Mejoravit solar panel installer in Monterrey, Mexico.
+
+## Principal
+
+- [Página de Paneles Solares con Mejoravit](https://mejoravit.futurenergy.mx): Página principal — conoce el programa, verifica tu elegibilidad y agenda una videollamada gratuita con un asesor solar
+- [Contenido completo del sitio para LLMs](https://mejoravit.futurenergy.mx/llms-full.txt): Texto completo del sitio incluyendo servicios, elegibilidad, preguntas frecuentes, testimonios y datos de contacto
+
+## Sobre FuturEnergy
+
+- [FuturEnergy Facebook](https://www.facebook.com/futurenergy.mx): Página oficial de Facebook con fotos de proyectos, historias de clientes y novedades
+- [FuturEnergy Instagram](https://www.instagram.com/futurenergy.mx): Instagram oficial con galerías de instalaciones solares y testimonios de clientes
+
+## Cómo Funciona
+
+- [Mejoravit Explicado (YouTube)](https://www.youtube.com/embed/8y-H0zvkwVI): Video de 3:45 minutos explicando cómo usar tu crédito Mejoravit de INFONAVIT para paneles solares
+
+## Contacto
+
+- [WhatsApp](https://wa.me/528183527867): Contacto directo por WhatsApp — +52 81 8352 7867
+- [Correo electrónico](mailto:info@futurenergy.mx): info@futurenergy.mx
+- Teléfono: +52 81 8396 3532
+- Ubicación: San Pedro Garza García, Nuevo León, México
+
+## Otros Programas
+
+- [Pyme Verde para Empresas](https://pyme.futurenergy.mx): Financiamiento solar para PyMEs a través de Afirme + Gobierno de Nuevo León
+
+## Optional
+
+- [Sitemap](https://mejoravit.futurenergy.mx/sitemap.xml): Mapa del sitio XML
